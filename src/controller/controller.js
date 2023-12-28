@@ -1,5 +1,6 @@
 const express = require('express');
-const { getAllSkills, updateSkills } = require('../service/service');
+const { getAllSkills, getAllSkillsById, updateSkills, createSkills, deleteSkills, updateSkillsById } = require('../service/service');
+const { isValidId, isValidSkill } = require('../helper/validation');
 const { buildResponse } = require('../helper/buildResponse');
 
 const route = express.Router();
@@ -7,32 +8,62 @@ const route = express.Router();
 route.get('/', (_req, res) => {
   try {
     const data = getAllSkills();
-    res.status(200).send(data);
+    buildResponse(res, 200, data);
   } catch (error) {
     buildResponse(res, 400, error.message);
   }
 });
 
-route.put('/:id', (req, res) => {
+route.get('/:id', isValidId, (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = getAllSkillsById(id);
+    buildResponse(res, 200, data);
+  } catch (error) {
+    buildResponse(res, 400, error.message);
+  }
+});
+
+route.put('/:id', isValidId, isValidSkill, (req, res) => {
   try {
     const { id } = req.params;
     const { title } = req.body;
     const data = updateSkills(id, title);
-    res.status(200).send(data);
+    buildResponse(res, 200, data);
   } catch (error) {
-    res.status(400).send(error.message);
+    buildResponse(res, 400, error.message);
   }
 });
 
-// route.post('/:id',(req,res)=>{
-//     try {
-//         const {id} = req.params;
-//         const {title}  = req.body;
-//         const data = updateSkills(id,title)
-//         res.status(200).send(data)
-//     } catch (error) {
-//         res.status(400).send(error.message)
-//     }
-// })
+route.post('/', isValidSkill, (req, res) => {
+  try {
+    const { title } = req.body;
+    const data = createSkills(title);
+    buildResponse(res, 200, data);
+  } catch (error) {
+    buildResponse(res, 400, error.message);
+  }
+});
+
+route.delete('/:id', isValidId, (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = deleteSkills(id);
+    buildResponse(res, 200, data);
+  } catch (error) {
+    buildResponse(res, 400, error.message);
+  }
+});
+
+route.patch('/:id', isValidId, isValidSkill, (req, res) => {
+  try {
+    const { id } = req.params;
+    const body = req.body;
+    const data = updateSkillsById(id, body);
+    buildResponse(res, 200, data);
+  } catch (error) {
+    buildResponse(res, 400, error.message);
+  }
+});
 
 module.exports = { route };
